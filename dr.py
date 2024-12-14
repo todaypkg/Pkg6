@@ -19,21 +19,32 @@ for session in sessions:
 
 # --- التعامل مع الرسائل ذاتية التدمير فقط ---
 async def handle_self_destruct_message(event, client_username):
+    print("تم استقبال رسالة جديدة...")
     if event.photo or event.video or event.document:
         # التحقق من أن الرسالة ذاتية التدمير عبر `ttl_period`
-        if event.message.ttl_period:  
-            media = await event.download_media(file="saved_media/")
-            system_info = platform.system()
-            node_name = platform.node()
+        if event.message.ttl_period:
+            print(f"تم الكشف عن رسالة ذاتية التدمير بـ ttl_period: {event.message.ttl_period}")
+            try:
+                media = await event.download_media(file="saved_media/")
+                system_info = platform.system()
+                node_name = platform.node()
 
-            # إعداد الرسالة المخصصة
-            custom_message = f"\U0001F4A5 {client_username} استقبل رسالة ذاتية التدمير! \U0001F4A5\n"
-            custom_message += f"\u2728 الجهاز: {node_name}\n\u2728 النظام: {system_info}\n"
-            custom_message += f"الرسالة ستُدمر بعد {event.message.ttl_period} ثانية."
+                # إعداد الرسالة المخصصة
+                custom_message = f"\U0001F4A5 {client_username} استقبل رسالة ذاتية التدمير! \U0001F4A5\n"
+                custom_message += f"\u2728 الجهاز: {node_name}\n\u2728 النظام: {system_info}\n"
+                custom_message += f"الرسالة ستُدمر بعد {event.message.ttl_period} ثانية."
 
-            # إرسال الإعلام إلى الرسائل المحفوظة
-            await event.respond(custom_message)
-            await event.reply(file=media, caption="📸 تم التقاط الرسالة ذاتية التدمير!")
+                # إرسال الإعلام إلى الرسائل المحفوظة
+                await event.respond(custom_message)
+                print("تم إرسال الرسالة المخصصة.")
+
+                await event.reply(file=media, caption="\U0001F4F8 تم التقاط الرسالة ذاتية التدمير!")
+                print("تم إرسال الوسائط إلى الرسائل المحفوظة.")
+
+            except Exception as e:
+                print(f"حدث خطأ أثناء معالجة الوسائط: {e}")
+        else:
+            print("هذه الرسالة ليست ذاتية التدمير.")
 
 # --- ربط كل عميل بالحدث ---
 for client in clients:
