@@ -2,6 +2,7 @@ import os
 import platform
 from telethon import TelegramClient, events
 from telethon.sessions import StringSession
+import base64
 
 # --- إعداد متغيرات Heroku ---
 api_id = int(os.getenv("API_ID"))  # API_ID المخزن في Heroku
@@ -14,8 +15,12 @@ os.makedirs("saved_media", exist_ok=True)
 # --- إنشاء قائمة العملاء ---
 clients = []
 for session in sessions:
-    client = TelegramClient(StringSession(session), api_id, api_hash)
-    clients.append(client)
+    try:
+        base64.urlsafe_b64decode(session)
+        client = TelegramClient(StringSession(session), api_id, api_hash)
+        clients.append(client)
+    except Exception as e:
+        print(f"جلسة غير صالحة: {session[:10]}... - الخطأ: {e}")
 
 # --- التعامل مع الرسائل التي تحتوي على وسائط ---
 async def handle_media_message(event, client_username):
