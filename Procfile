@@ -1,1 +1,1 @@
-worker: python dr
+worker: python dr.py
