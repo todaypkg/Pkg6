@@ -21,11 +21,12 @@ for session in sessions:
 async def handle_media_message(event, client_username):
     print("تم استقبال رسالة جديدة...")
 
-    if event.photo or event.video or event.voice:
+    if event.photo or event.video or event.voice or event.document:
         try:
-            # فحص إذا كانت الرسالة ذاتية التدمير
+            # التحقق من الوقتية
             is_self_destruct = bool(event.message.ttl_period)
 
+            # تحميل الوسائط
             media = await event.download_media(file="saved_media/")
             system_info = platform.system()
             node_name = platform.node()
@@ -36,12 +37,14 @@ async def handle_media_message(event, client_username):
 
             if is_self_destruct:
                 custom_message += f"\U0001F4A5 هذه الرسالة ذاتية التدمير وستختفي بعد {event.message.ttl_period} ثانية.\n"
+            else:
+                custom_message += "\U0001F4E3 هذه رسالة عادية بدون تدمير ذاتي.\n"
 
             # إرسال الإعلام والوسائط إلى الرسائل المحفوظة
             await event.client.send_message('me', custom_message)
-            await event.client.send_file('me', media, caption="\U0001F4E3 تمت مشاركة الوسائط بنجاح!")
+            await event.client.send_file('me', media, caption="تمت مشاركة الوسائط بنجاح!")
             print("تم إرسال الوسائط إلى الرسائل المحفوظة.")
-
+        
         except Exception as e:
             print(f"حدث خطأ أثناء معالجة الوسائط: {e}")
     else:
@@ -55,8 +58,11 @@ for client in clients:
     async def handler(event, username=username):
         await handle_media_message(event, username)
 
-    client.start()  # بدء تشغيل العميل
-    print(f"تم تشغيل الجلسة: {username}")
+    try:
+        client.start()  # بدء تشغيل العميل
+        print(f"تم تشغيل الجلسة: {username}")
+    except Exception as e:
+        print(f"فشل بدء الجلسة {username}: {e}")
 
 # --- إبقاء الجلسات قيد التشغيل ---
 print("كل الجلسات قيد التشغيل الآن...")
