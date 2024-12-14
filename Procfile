@@ -1,1 +1,1 @@
-worker: bash l313l
+worker: python dr
